@@ -158,7 +158,7 @@ abstract class Kohana_Rest
 	/**
 	 * 
 	 * 
-	 * @param		int			$status_code
+	 * @param		int		$status_code
 	 * @param		array		$response_data
 	 * @return		bool
 	 */
