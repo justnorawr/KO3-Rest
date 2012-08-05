@@ -9,8 +9,6 @@
 abstract class Kohana_Rest_Signature
 {
 	protected $_config;
-	
-	protected $_public_key;
 
 	protected $_private_key;
 
