@@ -1,15 +1,19 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * 
- * 
- * @package		Kohana
- * @subpackage	Rest
- * @author		Nicholas Curtis			<nich.curtis@gmail.com>		<http://www.nichcurtis.me> 
+ * @package		KO3-Rest
+ * @subpackage	Core
+ * @author		Nicholas Curtis	<nich.curtis@gmail.com>
  */
 
 abstract class Kohana_Rest
 {
+	// available REST request methods
+	const GET	=	'GET';
+	const POST	=	'POST';
+	const PUT	=	'PUT';
+	const DELETE	=	'DELETE';
+
 	/**
 	 * holds instances of Kohana_Rest
 	 * 
@@ -77,12 +81,14 @@ abstract class Kohana_Rest
 	 */
 	protected function __construct ()
 	{
+		$this->_config = Kohana::$config->load('rest');
+
 		$this->request_vars	=	array();
 		$this->data		=	null;
 		$this->http_accept	=	($_SERVER['HTTP_ACCEPT'] == 'application/xml')
 								? 'application/xml'
 								: 'application/json';
-		$this->method	=	'GET';
+		$this->method	=	Rest::GET;
 	}
 	
 	/**
@@ -94,28 +100,32 @@ abstract class Kohana_Rest
 	public function process ()
 	{
 		// get request method from $_SERVER var
-		$this->method = (array_key_exists('REQUEST_METHOD', $_SERVER)) ? $_SERVER['REQUEST_METHOD'] : 'GET' ;
+		$this->method = (array_key_exists('REQUEST_METHOD', $_SERVER)) ? $_SERVER['REQUEST_METHOD'] : REST::GET ;
 		
 		switch ($this->method)
 		{
 			// if request method is GET then get data from $_GET
-			case 'GET':
+			case Rest::GET:
 				$this->request_data = $_GET;
 				break;
 			
 			// if request method is POST then get data from $_POST
-			case 'POST':
+			case Rest::POST:
 				$this->request_data = $_POST;
 				break;
 			
 			// if request method is PUT then get post data
-			case 'PUT':
+			case Rest::PUT:
 				$this->request_data = $_POST;
 				break;
 			
 			// if request method is DELETE then we dont check for data
-			case 'DELETE':
+			case Rest::DELETE:
 				$this->request_data = array();
+				break;
+
+			default:
+				throw new Rest_Exception('Invalid request method');
 				break;
 		}
 		
@@ -123,6 +133,20 @@ abstract class Kohana_Rest
 		if (array_key_exists('data', $this->request_data))
 		{
 			$this->data = json_decode(urldecode($this->request_data['data']));	
+
+			if ( $this->_config['sign_request'] === TRUE )
+			{
+				if ( ! array_key_exists('signature', $this->data))
+				{
+					// @todo log debug profile
+					return false;
+				}
+
+				if ( $this->data['signature'] !== Rest_Signature::factory()->verify($route, $this->data, $this->method) )
+				{
+					throw new Rest_Exception('Invalid Signature');
+				}
+			}
 		}
 		
 		return $this;
@@ -191,11 +215,17 @@ abstract class Kohana_Rest
 					'method'	=>	$this->method,
 					'data'		=>	array('request' => $this->request_data, 'processed' => $this->data),
 				);
+
+				if ($this->_config['sign_request'] === TRUE)
+				{
+					$return_data['signature'] = Rest_Signature::factory($private_key)
+									->signature($route, $data, $method);
+				}
 				
 				// add data if we have some
 				if ( ! empty($response_data)) $return_data->body = $response_data;
 				
-				// output all return data asa JSON formatted string
+				// output all return data as JSON formatted string
 				echo urlencode(json_encode($return_data)); exit;
 				break;
 		}

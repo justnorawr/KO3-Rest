@@ -1,11 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * 
- * 
- * @package		Kohana
- * @subpackage	Rest
- * @author		Nicholas Curtis			<nich.curtis@gmail.com>		<http://www.nichcurtis.me> 
+ * @package		KO3-Rest
+ * @subpackage	Utility
+ * @author		Nicholas Curtis	<nich.curtis@gmail.com>
  */
 
 abstract class Kohana_Rest_Util
