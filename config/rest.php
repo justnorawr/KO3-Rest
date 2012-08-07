@@ -30,5 +30,5 @@ return array
 
 		'debug'			=>	TRUE,
 		'profile'			=>	TRUE,
-	),
+	)
 );
