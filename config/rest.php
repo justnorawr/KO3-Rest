@@ -13,7 +13,7 @@ return array
 	'signature'	=>	array
 	(
 		// data index name for timestamp field
-		'timestamp'		=>	'timstamp',
+		'timestamp'		=>	'timestamp',
 
 		// data index name for public api key
 		'public_key'		=>	'public_key',
@@ -23,12 +23,12 @@ return array
 		
 		// time difference to allow for variations in times on client/server
 		// should be as low as possible to prevent replay attacks
-		'replaytimeout'		=>	3000,
+		'replaytimeout'		=>	60,
 
 		// salt to use with php crypt function
 		'salt'			=>	'$2a$10$',
 
-		'debug'			=>	TRUE,
+		'debug'			=>	50,
 		'profile'			=>	TRUE,
 	)
 );

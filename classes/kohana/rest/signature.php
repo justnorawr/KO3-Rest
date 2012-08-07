@@ -52,7 +52,7 @@ abstract class Kohana_Rest_Signature
 	/**
 	 * creates salt and hash and encypts information using php crypt()
 	 *
-	 * salt = private_key::method::route
+	 * salt = private_key
 	 * signature = method::public_key::private_key::timestamp:: md5(data)
 	 * 
 	 * @param	string		$route			route name for request
@@ -63,7 +63,7 @@ abstract class Kohana_Rest_Signature
 	protected function _sign ($route, $data, $method)
 	{
 		// create salt using private key, method, and route
-		$salt = $this->_private_key.'::'.$method.'::'.$route;
+		$salt = $this->_private_key;
 
 		// get data and remove signature from it
 		$requestData = $data;
@@ -71,8 +71,17 @@ abstract class Kohana_Rest_Signature
 		// remove signature from data array if it exists
 		if (array_key_exists('signature', $requestData)) unset($requestData['signature']);
 
+		// implode data into a string ex (key=value&key1=value1&key2=value2)
+		$requestDataString = $concat = '';
+
+		foreach ($requestData AS $key => $value)
+		{
+			$requestDataString .= $concat . $key . '=' . $value;
+			$concat = '&';
+		}
+
 		$signature = $method . '::' . $data['public_key'] . '::' . $this->_private_key .
-				'::' . $data['timestamp'] . '::' . md5($requestData);
+				'::' . $data['timestamp'] . '::' . md5($requestDataString);
 
 		$encrypted = crypt($signature, $this->_config['salt'].$salt.'$');
 
@@ -96,11 +105,11 @@ abstract class Kohana_Rest_Signature
 		}
 
 		// make sure timestamp is within allowed range
-		$high_timestamp = $data[$this->_config['timestamp']] + $this->_config['replaytime'];
-		$low_timestamp = $data[$this->_config['timestamp']] - $this->_config['replaytime'];
+		$high_timestamp = $data[$this->_config['timestamp']] + $this->_config['replaytimeout'];
+		$low_timestamp = $data[$this->_config['timestamp']] - $this->_config['replaytimeout'];
 		$current_time = time();
 		
-		if ($current_time < $low_timestamp OR $current_time > $high_stamp)
+		if ($current_time < $low_timestamp OR $current_time > $high_timestamp)
 		{
 			// @todo log debug profile
 			return false;
@@ -137,15 +146,6 @@ abstract class Kohana_Rest_Signature
 
 		// return false if public_key does not exist in data passed
 		if ( ! array_key_exists($this->_config['public_key'], $data))
-		{
-			// @todo log debug profile
-			return false;
-		}
-
-		// get public key and verify it matches ours
-		$public_key = $data['public_key'];
-
-		if ($public_key != $this->_public_key)
 		{
 			// @todo log debug profile
 			return false;
