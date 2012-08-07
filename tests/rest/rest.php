@@ -1,11 +1,4 @@
-<?php
-/**
-*  @package    Kohana/Cache
- * @category   Test
- * @author     Kohana Team
- * @copyright  (c) 2009-2011 Kohana Team
- * @license    http://kohanaphp.com/license
- */
+<?php defined('SYSPATH') or die('No direct script access.');
 
 class RestTest extends Kohana_Unittest_TestCase
 {
@@ -27,7 +20,7 @@ class RestTest extends Kohana_Unittest_TestCase
 				'public_key'	=>	'',
 				'signature'	=>	'',
 				'key1'		=>	'value1',
-				'key2'		=>	'value2'
+				'ke`y2'		=>	'value2'
 			),
 			Rest::GET, // method
 			''// private key
@@ -36,7 +29,7 @@ class RestTest extends Kohana_Unittest_TestCase
 
 	public function testSignature ()
 	{
-		$expected_signature = '';
+		$expected_signature = 'asdfasdfasdfasdfasdfasdfasdf';
 
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
@@ -63,7 +56,7 @@ class RestTest extends Kohana_Unittest_TestCase
 
 	public function testSignatureVerification ()
 	{
-		list($route, $data, $method) = $this->_getSignatureData();
+		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
 		$result = Rest_Signature::factory($private_key)
 					->verify($route, $data, $method);
@@ -76,7 +69,7 @@ class RestTest extends Kohana_Unittest_TestCase
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
 		// break timestamp by adding 2 times the config time limit
-		$data['timestamp'] = time + ($this->_config['signature']['replaytimeout'] * 2);
+		$data['timestamp'] = time() + ($this->_config['signature']['replaytimeout'] * 2);
 
 		$result = Rest_Signature::factory($private_key)
 					->verify($route, $data, $method);
