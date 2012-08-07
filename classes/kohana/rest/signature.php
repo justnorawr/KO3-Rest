@@ -18,9 +18,9 @@ abstract class Kohana_Rest_Signature
 	 * @return		Rest_Signature
 	 * @chainable
 	 */
-	public static function factory ($public_key, $private_key)
+	public static function factory ($private_key)
 	{
-		return new Rest_Signature($public_key, $private_key);
+		return new Rest_Signature($private_key);
 	}
 
 	public function __construct ($private_key)
@@ -67,7 +67,9 @@ abstract class Kohana_Rest_Signature
 
 		// get data and remove signature from it
 		$requestData = $data;
-		unset($requestData['signature']);
+		
+		// remove signature from data array if it exists
+		if (array_key_exists('signature', $requestData)) unset($requestData['signature']);
 
 		$signature = $method . '::' . $data['public_key'] . '::' . $this->_private_key .
 				'::' . $data['timestamp'] . '::' . md5($requestData);
@@ -135,13 +137,6 @@ abstract class Kohana_Rest_Signature
 
 		// return false if public_key does not exist in data passed
 		if ( ! array_key_exists($this->_config['public_key'], $data))
-		{
-			// @todo log debug profile
-			return false;
-		}
-
-		// return false if signature does not exist in data passed
-		if ( ! array_key_exists($this->_config['signature'], $data))
 		{
 			// @todo log debug profile
 			return false;
