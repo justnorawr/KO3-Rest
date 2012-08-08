@@ -39,7 +39,7 @@ class Rest_SignatureTest extends Kohana_Unittest_TestCase
 		$this->assertEquals($this->signature, $signature);
 	}
 
-	public function testSignaturePrivateKey ()
+	public function testSignatureBadPrivateKey ()
 	{
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
@@ -52,7 +52,7 @@ class Rest_SignatureTest extends Kohana_Unittest_TestCase
 		$this->assertNotEquals($this->signature, $signature);
 	}
 
-	public function testSignatureVerification ()
+	public function testVerifyBadTimestamp ()
 	{
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
@@ -62,7 +62,7 @@ class Rest_SignatureTest extends Kohana_Unittest_TestCase
 		$this->assertEquals(FALSE, $result);
 	}
 
-	public function testSignatureMethod ()
+	public function testVerifyBadMethod ()
 	{
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
@@ -75,26 +75,13 @@ class Rest_SignatureTest extends Kohana_Unittest_TestCase
 		$this->assertEquals(FALSE, $result);
 	}
 
-	public function testSignatureData ()
+	public function testVerifyBadData ()
 	{
 		list($route, $data, $method, $private_key) = $this->_getSignatureData();
 
 		// add extra data, this should break the signature
 		$data['key3'] = 'value3';
 		$data['key4'] = 'value4';
-
-		$result = Rest_Signature::factory($private_key)
-					->verify($route, $data, $method);
-
-		$this->assertEquals(FALSE, $result);
-	}
-
-	public function testSignatureVerificationTimestamp ()
-	{
-		list($route, $data, $method, $private_key) = $this->_getSignatureData();
-
-		// break timestamp by adding 2 times the config time limit
-		$data['timestamp'] = time() + ($this->_config['signature']['replaytimeout'] * 2);
 
 		$result = Rest_Signature::factory($private_key)
 					->verify($route, $data, $method);
