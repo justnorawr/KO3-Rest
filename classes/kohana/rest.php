@@ -57,6 +57,13 @@ abstract class Kohana_Rest
 	protected $method;
 
 	/**
+	 * holds current request URI
+	 * 
+	 * @var		string
+	 */
+	protected $route;
+
+	/**
 	 * 
 	 * 
 	 * @param	string		$name		// name of instance
@@ -83,6 +90,7 @@ abstract class Kohana_Rest
 	{
 		$this->_config = Kohana::$config->load('rest');
 
+		$this->route		=	Request::$current->uri();
 		$this->request_vars	=	array();
 		$this->data		=	null;
 		$this->http_accept	=	($_SERVER['HTTP_ACCEPT'] == 'application/xml')
@@ -90,17 +98,66 @@ abstract class Kohana_Rest
 								: 'application/json';
 		$this->method	=	Rest::GET;
 	}
+
+	/**
+	 * updates configuration array for current instance
+	 *
+	 * @param	array 		$config	new config values
+	 * @return	bool
+	 */
+	public function setConfig (Array $config)
+	{
+		if ( count($config) > 0)
+		{
+			// update config with new info
+			$_config = (array) $this->_config;
+			$this->_config = ARR::merge($_config, $config);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * updates configuration array for current instance
+	 *
+	 * @param	array 		$config	new config values
+	 * @return	bool
+	 */
+	public function setSignatureConfig (Array $config)
+	{
+		if ( count($config) > 0)
+		{
+			// update signature config array with new info
+			$this->_config['signature'] = ARR::merge($this->_config['signature'], $config);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns configuration array for current instance
+	 *
+	 * @return 	array
+	 */
+	public function config ()
+	{
+		return $this->_config;
+	}
 	
 	/**
-	 * 
+	 *  checks request method and loads request data into object
+	 *  if sign_request is true, will also verify signature
 	 * 
 	 * @return		Rest
 	 * @chainable
+	 * @throws		Rest_Exception
 	 */
 	public function process ()
 	{
 		// get request method from $_SERVER var
-		$this->method = (array_key_exists('REQUEST_METHOD', $_SERVER)) ? $_SERVER['REQUEST_METHOD'] : REST::GET ;
+		$this->method = (array_key_exists('REQUEST_METHOD', $_SERVER)) ? $_SERVER['REQUEST_METHOD'] : Rest::GET ;
 		
 		switch ($this->method)
 		{
@@ -125,6 +182,7 @@ abstract class Kohana_Rest
 				break;
 
 			default:
+				// @todo log debug profile
 				throw new Rest_Exception('Invalid request method');
 				break;
 		}
@@ -139,14 +197,43 @@ abstract class Kohana_Rest
 				if ( ! array_key_exists('signature', $this->data))
 				{
 					// @todo log debug profile
-					return false;
-				}
-
-				if ( $this->data['signature'] !== Rest_Signature::factory()->verify($route, $this->data, $this->method) )
-				{
 					throw new Rest_Exception('Invalid Signature');
 				}
+
+				if ( ! empty($this->_private_key) )
+				{
+					$signature = Rest_Signature::factory($this->_private_key)->verify($this->route, $this->data, $this->method);
+
+					if ($this->data['signature'] !== $signature)
+					{
+						// @todo log debug profile
+						throw new Rest_Exception('Invalid Signature');
+					}
+					else
+					{
+						// everything is good, and signature checked out
+						return $this;
+					}
+				}
+				else
+				{
+					// @todo log debug profile
+					throw new Rest_Exception('Invalid Private Key');
+				}
 			}
+			else
+			{
+				// do not need to validate signature, all else is good
+				return $this;
+			}
+		}
+
+		// no data sent, if we are supposed to verify request
+		// we know for sure it is invalid since it is empty
+		if ( $this->_config['sign_request'] === TRUE )
+		{
+			// @todo log debug profile
+			throw new Rest_Exception('Invalid Signature');
 		}
 		
 		return $this;
@@ -166,8 +253,9 @@ abstract class Kohana_Rest
 	/**
 	 * used to access properties in $this->data
 	 * 
-	 * @param		string		$name
-	 * @return		void
+	 * @param	string		$name
+	 * @return	void
+	 * @throws	Rest_Exception
 	 */
 	public function __get ($name)
 	{
@@ -180,28 +268,37 @@ abstract class Kohana_Rest
 	}
 	
 	/**
+	 * Sets kohana request headers and response body
 	 * 
-	 * 
-	 * @param		int		$status_code
-	 * @param		array		$response_data
-	 * @return		bool
+	 * @param	int		$status_code
+	 * @param	array		$response_data
+	 * @return	bool
+	 * @throws	Rest_Exception
 	 */
 	public function respond ($status_code, $response_data=array())
 	{
 		// set status header from status code passed
 		$status_message = Rest_Util::factory()->status_message($status_code);
 		$status_header = 'HTTP/1.1 ' . $status_code . ' ' . $status_message;
-		header($status_header);
+		Request::$current->headers($status_header);
 		
 		// check http accept and set content type to what they will accept
-		header('Content-Type: '.$this->http_accept);
+		Request::$current->headers('Content-Type: '.$this->http_accept);
 		
 		// check what kind of data we are allowed to return
 		switch ($this->http_accept)
 		{
 			// return xml data
 			case 'application/xml':
-				echo '<response><status><code>501</code><message>Not Implemented</message></status></response>'; exit;
+				Request::$current->body
+				('
+					<response>
+						<status>
+							<code>501</code>
+							<message>Not Implemented</message>
+						</status>
+					</response>
+				');
 				break;
 			
 			// return json data
@@ -218,16 +315,30 @@ abstract class Kohana_Rest
 
 				if ($this->_config['sign_request'] === TRUE)
 				{
-					$return_data['signature'] = Rest_Signature::factory($private_key)
-									->signature($route, $data, $method);
+					$signature = Rest_Signature::factory($private_key)
+									->signature($this->route, $this->data, $this->method);
+					if ($signature)
+					{
+						$return_data['signature'] = $signature;
+					}
+					else
+					{
+						throw new Rest_Exception('Unable to sign request.');
+					}
 				}
 				
 				// add data if we have some
 				if ( ! empty($response_data)) $return_data->body = $response_data;
 				
 				// output all return data as JSON formatted string
-				echo urlencode(json_encode($return_data)); exit;
+				Request::$current->body(urlencode(json_encode($return_data)));
+				break;
+
+			default:
+				throw new Rest_Exception('Invalid HTTP Accept type');
 				break;
 		}
+
+		return true;
 	}
 }
