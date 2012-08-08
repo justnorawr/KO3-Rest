@@ -23,12 +23,12 @@ return array
 		
 		// time difference to allow for variations in times on client/server
 		// should be as low as possible to prevent replay attacks
-		'replaytimeout'		=>	60,
+		'replaytimeout'		=>	60, // int > 0 or NULL for no timestamp checking
 
 		// salt to use with php crypt function
 		'salt'			=>	'$2a$10$',
+	),
 
-		'debug'			=>	50,
-		'profile'			=>	TRUE,
-	)
+	'debug'			=>	50,
+	'profile'			=>	TRUE
 );
