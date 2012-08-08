@@ -4,9 +4,17 @@ class Rest_UtilTest extends Kohana_Unittest_TestCase
 {
 	public function _codes ()
 	{
-		return array(
-			array(
-				array(200, 201, 202, 400, 401, 500, 501, 502, 503, 505)
+		return array
+		(
+			array
+			(
+				// $codes
+				array
+				(
+					100, 101, 200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304,
+					305, 306, 307, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
+					411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505
+				)
 			)
 		);
 	}
