@@ -104,15 +104,18 @@ abstract class Kohana_Rest_Signature
 			return false;
 		}
 
-		// make sure timestamp is within allowed range
-		$high_timestamp = $data[$this->_config['timestamp']] + $this->_config['replaytimeout'];
-		$low_timestamp = $data[$this->_config['timestamp']] - $this->_config['replaytimeout'];
-		$current_time = time();
-		
-		if ($current_time < $low_timestamp OR $current_time > $high_timestamp)
+		if ( array_key_exists('replaytimeout', $this->_config) AND (int) $this->_config['replaytimeout'] > 0 )
 		{
-			// @todo log debug profile
-			return false;
+			// make sure timestamp is within allowed range
+			$high_timestamp = $data[$this->_config['timestamp']] + $this->_config['replaytimeout'];
+			$low_timestamp = $data[$this->_config['timestamp']] - $this->_config['replaytimeout'];
+			$current_time = time();
+			
+			if ($current_time < $low_timestamp OR $current_time > $high_timestamp)
+			{
+				// @todo log debug profile
+				return false;
+			}
 		}
 
 		$signature = $data[$this->_config['signature']];
