@@ -2,8 +2,11 @@
 
 /**
  * @package		KO3-Rest
- * @subpackage	Utility
+ * @subpackage	Exception
  * @author		Nicholas Curtis	<nich.curtis@gmail.com>
  */
 
-class Rest_Util extends Kohana_Rest_Util {}
+abstract class Kohana_Rest_Exception extends Kohana_Exception
+{
+
+}
