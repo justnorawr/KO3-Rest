@@ -90,7 +90,7 @@ abstract class Kohana_Rest
 	{
 		$this->_config = Kohana::$config->load('rest');
 
-		$this->route		=	Request::$current->uri();
+		$this->route		=	'Rest::Test';
 		$this->request_vars	=	array();
 		$this->data		=	null;
 		$this->http_accept	=	($_SERVER['HTTP_ACCEPT'] == 'application/xml')

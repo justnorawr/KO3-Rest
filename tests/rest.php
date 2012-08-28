@@ -4,6 +4,12 @@ class RestTest extends Kohana_Unittest_TestCase
 {
 	protected $signature = '$2a$10$THISISMYPRIVATEKEY$$$.oAd/1k9UJsGHBu5fMkWdj2jvhUbc.b.';
 
+	public function __construct ()
+	{
+		$_SERVER['HTTP_ACCEPT'] = 'application//json';
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+	}
+
 	public function testConfig ()
 	{
 		$keys = array
