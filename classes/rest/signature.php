@@ -2,8 +2,8 @@
 
 /**
  * @package		KO3-Rest
- * @subpackage	Utility
+ * @subpackage	Signature
  * @author		Nicholas Curtis	<nich.curtis@gmail.com>
  */
 
-class Rest_Util extends Kohana_Rest_Util {}
+class Rest_Signature extends Kohana_Rest_Signature { }
