@@ -34,7 +34,7 @@ Holds all config information used to compute signatures.
   - Default: signature   
 
 + replaytimeout (int)
-  - Time in seconds that a request must be made in, after creating a signature. This should allow for a small fluctation in time between client and server.
+  - Time in seconds that a request must be made in, after creating a signature. This should allow for a small fluctuation in time between client and server.
   - Default: 60  
 
 + salt (string)
