@@ -1,0 +1,56 @@
+{# View Information #}
+{% set title = 'Test Client' %}
+{% extends "nosql/template/default.twig" %}
+
+{# OnLoad Block #}{% block onload %}
+
+{% endblock onload %}{# End OnLoad Block #}
+
+{# Resources Block #}{% block resources %}
+
+{% endblock resources %}{# End Resources Block #}
+
+{# Content Block #}{% block content %}
+
+<form class="form-horizontal">
+	<div class="control-group">
+		<label for="method">Method</label>
+		<div class="controls">
+			<select id="method" name="method">
+				<option>GET</option>
+				<option>POST</option>
+				<option>PUT</option>
+				<option>DELETE</option>
+			</select>
+		</div>
+	</div>
+	<div class="control-group">
+		<label for="controller">Controller</label>
+		<div class="controls">
+			<select id="controller" name="controller">
+				<option>select a controller</option>
+			</select>
+		</div>
+	</div>
+	<div class="control-group">
+		<label for="controller">Action</label>
+		<div class="controls">
+			<select  id="action" name="action" disabled="disabled">
+				<option>first select a controller</option>
+			</select>
+		</div>
+	</div>
+	<div class="control-group">
+		<label for="controller">Params</label>
+		<div class="controls">
+			<input type="text" value="key1" placeholder="Key" />
+			<input type="text" value="value1" placeholder="Value" />
+			<button>+</button>
+		</div>
+	</div>
+	<div class="form-actions">
+		<button>Send my paramaters using the method chosen, to the controller and action selected and process it.</button>
+	</div>
+</form>
+
+{% endblock content %}{# End Content Block #}
