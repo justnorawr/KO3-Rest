@@ -35,6 +35,8 @@ class Controller_Rest_Example extends Controller_Template_Twig
 			$data[$name] = $_POST['values'][$key];
 		}
 
+		$url = $url . '?json_print_pretty=yes';
+
 		$ch = curl_init();
 		curl_setopt_array($ch, array(
 			CURLOPT_RETURNTRANSFER	=>	TRUE,
@@ -76,7 +78,11 @@ class Controller_Rest_Example extends Controller_Template_Twig
 
 		$response = curl_exec($ch);
 
-		echo $response;
+		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+		$header = substr($response, 0, $header_size);
+		$body = substr($response, $header_size);
+
+		echo json_encode(array('params' => print_r(array('GET' => $_GET, 'POST' => $_POST), true), 'response' => $body, 'headers' => $header));
 		exit;
 	}
 	

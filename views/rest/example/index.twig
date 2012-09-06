@@ -4,6 +4,8 @@
 
 {# OnLoad Block #}{% block onload %}
 
+prettyPrint();
+
 $('#client_test_form').on('submit', submit_form);
 
 $('#add_param').on('click', add_param);
@@ -21,13 +23,18 @@ function add_param (event) {
 }
 
 function submit_form () {
-	$('#response').html('......Loading......');
-	$.post('rest_example/process', $('form#client_test_form').serialize(), submit_form_success);
+	$('#response').text('......Loading......');
+	$('#headers').text('......Loading......');
+	$('#resp_params').text('......Loading......');
+	$.post('rest_example/process', $('form#client_test_form').serialize(), submit_form_success, 'JSON');
 	event.preventDefault();
 }
 
 function submit_form_success (data) {
-	$('#response').html(data);
+	$('#headers').text(data.headers);
+	$('#resp_params').text(data.params);
+	$('#response').text(data.response);
+	prettyPrint();
 }
 
 {% endblock resources %}{# End Resources Block #}
@@ -52,7 +59,7 @@ function submit_form_success (data) {
 				<label class="control-label" for="controller">Controller</label>
 				<div class="controls">
 					<select id="controller" name="controller">
-						<option>select a controller</option>
+						<option>user_json</option>
 					</select>
 				</div>
 			</div>
@@ -60,7 +67,7 @@ function submit_form_success (data) {
 				<label class="control-label" for="action">Action</label>
 				<div class="controls">
 					<select  id="action" name="action">
-						<option>first select a controller</option>
+						<option>index</option>
 					</select>
 				</div>
 			</div>
@@ -81,9 +88,25 @@ function submit_form_success (data) {
 	</div>
 
 	<div class="span6">
-		<pre id="response" class="well">
+		<ul class="nav nav-tabs">
+			<li><a class="active" href="#headers" data-toggle="tab">Headers</a></li>
+			<li><a href="#resp_params" data-toggle="tab">Params</a></li>
+			<li><a href="#response" data-toggle="tab">Response</a></li>
+		</ul>
 
-		</pre>
+		<div class="tab-content">
+			<pre id="headers" class="tab-pane active prettyprint linenums languague-text">
+
+			</pre>
+
+			<pre id="resp_params" class="tab-pane prettyprint linenums languague-php">
+
+			</pre>
+			
+			<pre id="response" class="tab-pane prettyprint linenums languague-json">
+
+			</pre>
+		</div>
 	</div>
 </div>
 
