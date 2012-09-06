@@ -76,7 +76,7 @@ class Controller_Rest_Example extends Controller_Template_Twig
 
 		$response = curl_exec($ch);
 
-		var_dump($response);
+		echo $response;
 		exit;
 	}
 	

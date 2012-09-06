@@ -21,7 +21,7 @@ function add_param (event) {
 }
 
 function submit_form () {
-	console.log($('form#client_test_form').serialize());
+	$('#response').html('......Loading......');
 	$.post('rest_example/process', $('form#client_test_form').serialize(), submit_form_success);
 	event.preventDefault();
 }
