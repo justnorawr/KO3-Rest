@@ -35,8 +35,6 @@ class Controller_Rest_Example extends Controller_Template_Twig
 			$data[$name] = $_POST['values'][$key];
 		}
 
-		$url = $url . '?json_print_pretty=yes';
-
 		$ch = curl_init();
 		curl_setopt_array($ch, array(
 			CURLOPT_RETURNTRANSFER	=>	TRUE,
@@ -47,10 +45,13 @@ class Controller_Rest_Example extends Controller_Template_Twig
 		switch(strtoupper($method))
 		{
 			case 'GET':
-				curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($data));
+				curl_setopt($ch, CURLOPT_URL, $url . '?json_print_pretty=yes&' . http_build_query($data));
 				break;
 			
 			case 'POST':
+
+				$url = $url . '?json_print_pretty=yes';
+
 				curl_setopt($ch, CURLOPT_URL, $url);
 				curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
 				curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -58,6 +59,9 @@ class Controller_Rest_Example extends Controller_Template_Twig
 				break;
 			
 			case 'PUT':
+
+				$url = $url . '?json_print_pretty=yes';
+
 				curl_setopt($ch, CURLOPT_URL, $url);
 				curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -65,6 +69,9 @@ class Controller_Rest_Example extends Controller_Template_Twig
 				break;
 
 			case 'DELETE':
+
+				$url = $url . '?json_print_pretty=yes';
+
 				curl_setopt($ch, CURLOPT_URL, $url);
 				curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
